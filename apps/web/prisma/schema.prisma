@@ -1,0 +1,285 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                 String              @id @default(cuid())
+  name               String
+  email              String              @unique
+  passwordHash       String
+  role               String              @default("GUEST_WRITER")
+  bio                String?
+  avatar             String?
+  articles           Article[]           @relation("ArticleAuthor")
+  articleRevisions   ArticleRevision[]   @relation("ArticleRevisionActor")
+  articleCorrections ArticleCorrection[] @relation("ArticleCorrectionActor")
+  classifieds        ClassifiedListing[] @relation("ClassifiedSubmitter")
+  homepageVersions   HomepageVersion[]   @relation("HomepageVersionCreator")
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+model Section {
+  id             String    @id @default(cuid())
+  name           String
+  slug           String    @unique
+  navLabel       String?
+  description    String?
+  color          String?
+  icon           String?
+  isVisible      Boolean   @default(true)
+  showInTopNav   Boolean   @default(false)
+  position       Int       @default(999)
+  premium        Boolean   @default(false)
+  seoTitle       String?
+  seoDescription String?
+  seoImage       String?
+  parentId       String?
+  parent         Section?  @relation("SectionTree", fields: [parentId], references: [id])
+  children       Section[] @relation("SectionTree")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  articles       Article[]
+
+  @@index([position])
+  @@index([isVisible, showInTopNav, position])
+}
+
+model Article {
+  id                   String              @id @default(cuid())
+  title                String
+  content              String
+  contentBlocks        String?
+  dek                  String?
+  excerpt              String?
+  heroImage            String?
+  heroAlt              String?
+  status               String              @default("DRAFT")
+  viewCount            Int                 @default(0)
+  previewToken         String              @unique @default(cuid())
+  submittedAt          DateTime?
+  publishedAt          DateTime?
+  scheduledPublishAt   DateTime?
+  scheduledUnpublishAt DateTime?
+  authorId             String?
+  author               User?               @relation("ArticleAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  sectionId            String?
+  section              Section?            @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  seo                  ArticleSEO?
+  revisions            ArticleRevision[]
+  corrections          ArticleCorrection[]
+  homepageSlots        HomepageSlot[]
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  @@index([status, publishedAt])
+  @@index([sectionId, publishedAt])
+  @@index([scheduledPublishAt])
+  @@index([scheduledUnpublishAt])
+}
+
+model ArticleRevision {
+  id          String   @id @default(cuid())
+  articleId   String
+  article     Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  createdById String?
+  createdBy   User?    @relation("ArticleRevisionActor", fields: [createdById], references: [id], onDelete: SetNull)
+  action      String
+  note        String?
+  snapshot    String
+  createdAt   DateTime @default(now())
+
+  @@index([articleId, createdAt])
+  @@index([createdById, createdAt])
+}
+
+model ArticleCorrection {
+  id          String   @id @default(cuid())
+  articleId   String
+  article     Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  createdById String?
+  createdBy   User?    @relation("ArticleCorrectionActor", fields: [createdById], references: [id], onDelete: SetNull)
+  note        String
+  createdAt   DateTime @default(now())
+
+  @@index([articleId, createdAt])
+  @@index([createdById, createdAt])
+}
+
+model ArticleSEO {
+  id                String   @id @default(cuid())
+  articleId         String   @unique
+  article           Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  slug              String   @unique
+  metaTitle         String?
+  metaDesc          String?
+  canonical         String?
+  socialTitle       String?
+  socialDescription String?
+  socialImage       String?
+  noindex           Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Homepage {
+  id             String            @id @default(cuid())
+  slug           String            @unique @default("default")
+  title          String            @default("Homepage")
+  isActive       Boolean           @default(false)
+  seoTitle       String?
+  seoDescription String?
+  seoImage       String?
+  settings       String?
+  sections       HomepageSection[]
+  moodVotes      MoodSurveyVote[]
+  versions       HomepageVersion[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+model HomepageSection {
+  id         String         @id @default(cuid())
+  homepageId String
+  homepage   Homepage       @relation(fields: [homepageId], references: [id], onDelete: Cascade)
+  key        String
+  kind       String
+  title      String?
+  position   Int
+  settings   String?
+  slots      HomepageSlot[]
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@unique([homepageId, key])
+  @@unique([homepageId, position])
+}
+
+model HomepageSlot {
+  id              String          @id @default(cuid())
+  sectionId       String
+  section         HomepageSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  position        Int
+  articleId       String?
+  article         Article?        @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  titleOverride   String?
+  excerptOverride String?
+  imageOverride   String?
+  hrefOverride    String?
+  kickerOverride  String?
+  settings        String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([sectionId, position])
+}
+
+model HomepageVersion {
+  id           String    @id @default(cuid())
+  homepageId   String
+  homepage     Homepage  @relation(fields: [homepageId], references: [id], onDelete: Cascade)
+  label        String?
+  status       String    @default("DRAFT")
+  snapshot     String
+  previewToken String    @unique
+  scheduledFor DateTime?
+  publishedAt  DateTime?
+  createdById  String?
+  createdBy    User?     @relation("HomepageVersionCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([homepageId, status])
+  @@index([scheduledFor])
+}
+
+model MoodSurveyVote {
+  id          String   @id @default(cuid())
+  homepageId  String
+  homepage    Homepage @relation(fields: [homepageId], references: [id], onDelete: Cascade)
+  visitorId   String
+  surveyDay   String
+  optionKey   String
+  optionLabel String
+  createdAt   DateTime @default(now())
+
+  @@unique([homepageId, visitorId, surveyDay])
+  @@index([homepageId, surveyDay])
+  @@index([homepageId, createdAt])
+}
+
+model ClassifiedListing {
+  id            String              @id @default(cuid())
+  title         String
+  slug          String              @unique
+  category      String
+  price         String
+  location      String
+  summary       String
+  description   String
+  image         String?
+  sellerName    String
+  sellerEmail   String
+  sellerPhone   String?
+  status        String              @default("IN_REVIEW")
+  featured      Boolean             @default(false)
+  submittedAt   DateTime?
+  publishedAt   DateTime?
+  expiresAt     DateTime?
+  reviewNotes   String?
+  submittedById String?
+  submittedBy   User?               @relation("ClassifiedSubmitter", fields: [submittedById], references: [id], onDelete: SetNull)
+  enquiries     ClassifiedEnquiry[]
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@index([status, publishedAt, expiresAt])
+  @@index([category, status])
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  source    String   @default("public")
+  status    String   @default("SUBSCRIBED")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    String   @default("NEW")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model ClassifiedEnquiry {
+  id        String            @id @default(cuid())
+  listingId String
+  listing   ClassifiedListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  name      String
+  email     String
+  phone     String?
+  message   String
+  status    String            @default("NEW")
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([listingId, createdAt])
+  @@index([status, createdAt])
+}

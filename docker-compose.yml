@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: londonnews-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: londonnews
+      POSTGRES_USER: londonnews
+      POSTGRES_PASSWORD: londonnews
+    ports:
+      - "54329:5432"
+    volumes:
+      - londonnews-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U londonnews -d londonnews"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+volumes:
+  londonnews-postgres-data:

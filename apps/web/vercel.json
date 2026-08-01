@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/jobs/publish-homepage-due",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/jobs/process-article-schedule",
+      "schedule": "* * * * *"
+    }
+  ]
+}
