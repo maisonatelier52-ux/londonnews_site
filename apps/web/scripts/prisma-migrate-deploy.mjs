@@ -1,55 +1,20 @@
-import {
-  buildMigrationInsertSql,
-  createMigrationsTableSql,
-  getDatabaseConfig,
-  hasMigrationsTable,
-  listLocalMigrations,
-  runDockerPsql,
-  runPrismaDeploy,
-} from "./prisma-migrate-local-utils.mjs";
+// apps/web/scripts/prisma-migrate-deploy.mjs
+
+import { runPrismaDeploy } from "./prisma-migrate-local-utils.mjs";
 
 async function main() {
-  const config = getDatabaseConfig();
+  const databaseUrl = process.env.DATABASE_URL;
 
-  if (hasMigrationsTable(config)) {
-    runPrismaDeploy(config.appDir);
-    return;
+  if (!databaseUrl) {
+    console.error("DATABASE_URL is missing");
+    process.exit(1);
   }
 
-  const migrations = await listLocalMigrations();
-  if (migrations.length === 0) {
-    console.log("No local migrations found.");
-    return;
-  }
+  console.log("Running Prisma migrations...");
 
-  runDockerPsql({
-    capture: false,
-    container: config.dockerContainer,
-    database: config.database,
-    sql: createMigrationsTableSql(),
-    user: config.user,
-  });
+  runPrismaDeploy(process.cwd());
 
-  for (const migration of migrations) {
-    const sql = `
-BEGIN;
-${migration.sql}
-${buildMigrationInsertSql(migration)};
-COMMIT;
-`.trim();
-
-    runDockerPsql({
-      capture: false,
-      container: config.dockerContainer,
-      database: config.database,
-      sql,
-      user: config.user,
-    });
-
-    console.log(`Applied ${migration.name}`);
-  }
-
-  console.log(`Applied ${migrations.length} migrations using the local Postgres bootstrap path.`);
+  console.log("Migration completed successfully.");
 }
 
 main().catch((error) => {
