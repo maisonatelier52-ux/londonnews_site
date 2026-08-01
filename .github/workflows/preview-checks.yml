@@ -10,6 +10,7 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+
     services:
       postgres:
         image: postgres:16-alpine
@@ -24,15 +25,20 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
     env:
       DATABASE_URL: postgresql://londonnews:londonnews@127.0.0.1:54329/londonnews?schema=public
-      DIRECT_DATABASE_URL: postgresql://londonnews:londonnews@127.0.0.1:54329/londonnews?schema=public
+      DIRECT_URL: postgresql://londonnews:londonnews@127.0.0.1:54329/londonnews?schema=public
+
       NEXTAUTH_URL: http://127.0.0.1:3005
       NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3005
       NEXTAUTH_SECRET: ci-secret
+
       CRON_SECRET: ci-cron-secret
       CRON_TOKEN: ci-cron-secret
+
       ALLOW_GUEST_REGISTRATION: "false"
+
     steps:
       - uses: actions/checkout@v4
 
