@@ -12,6 +12,7 @@ function getInitials(name?: string | null) {
   return initials || "NN";
 }
 
+
 export function UserAvatar({
   name,
   avatar,
