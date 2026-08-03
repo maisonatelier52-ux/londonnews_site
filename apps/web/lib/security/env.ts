@@ -43,7 +43,7 @@ export function getRedisRestToken() {
 export function getRequiredRuntimeEnv() {
   return [
     "DATABASE_URL",
-    "DIRECT_DATABASE_URL",
+    "DIRECT_URL",
     "NEXTAUTH_URL",
     "NEXT_PUBLIC_SITE_URL",
     "NEXTAUTH_SECRET"

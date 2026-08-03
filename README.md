@@ -96,7 +96,7 @@ All local demo accounts use `LondonNews123!`:
 
 - Root `npm run ...` commands forward into the `@londonnews/web` workspace, so the developer can still work from the monorepo root.
 - The repo now uses a single PostgreSQL Prisma schema at [apps/web/prisma/schema.prisma](/Users/sam/Documents/LondonNews/apps/web/prisma/schema.prisma) for local, preview, and production.
-- For production hosting, run `npm run db:migrate:deploy` against the PostgreSQL `DIRECT_DATABASE_URL`, then build with `npm run build`.
+- For production hosting, run `npm run db:migrate:deploy` against the PostgreSQL `DIRECT_URL`, then build with `npm run build`.
 - Public APIs fail closed when the database or active homepage is unavailable; they no longer serve demo content in hosted environments.
 - The Vercel project root should be `apps/web`, with cron configured via [apps/web/vercel.json](/Users/sam/Documents/LondonNews/apps/web/vercel.json) and authenticated with `CRON_SECRET`.
 - The homepage admin and preview workflow are taken from the provided London News reference bundles and wrapped in a full working project.

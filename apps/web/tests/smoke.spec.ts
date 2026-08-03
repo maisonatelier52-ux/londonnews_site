@@ -8,7 +8,9 @@ test("homepage, taxonomy, and classifieds routes render", async ({ page }) => {
   await expect(page.getByText("Politics").first()).toBeVisible();
 
   await page.goto("/topics/westminster");
-  await expect(page.getByText("Westminster").first()).toBeVisible();
+  await expect(
+  page.locator("h1").filter({ hasText: "Westminster" })
+).toBeVisible();
 
   await page.goto("/classifieds");
   await expect(page.getByText("Classifieds").first()).toBeVisible();

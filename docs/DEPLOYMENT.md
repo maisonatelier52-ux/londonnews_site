@@ -7,7 +7,7 @@
 - Set the real `NEXTAUTH_URL`
 - Set the real `NEXT_PUBLIC_SITE_URL`
 - Set the real `CRON_SECRET`
-- Set `DIRECT_DATABASE_URL` for migration-time access
+- Set `DIRECT_URL` for migration-time access
 - Set `BLOB_READ_WRITE_TOKEN`
 - Set `UPSTASH_REDIS_REST_URL`
 - Set `UPSTASH_REDIS_REST_TOKEN`

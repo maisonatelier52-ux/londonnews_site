@@ -7,7 +7,7 @@ Use this checklist before handing London News to a hosting developer or pointing
 - Provision a PostgreSQL database for staging.
 - Copy values from [apps/web/.env.production.example](../apps/web/.env.production.example) into the hosting provider's environment manager.
 - Set `DATABASE_URL` to the staging PostgreSQL connection string.
-- Set `DIRECT_DATABASE_URL` to the direct/non-pooled staging PostgreSQL connection string.
+- Set `DIRECT_URL` to the direct/non-pooled staging PostgreSQL connection string.
 - Set `NEXTAUTH_URL` and `NEXT_PUBLIC_SITE_URL` to the staging URL.
 - Generate long random values for `NEXTAUTH_SECRET` and `CRON_SECRET`.
 - Set `BLOB_READ_WRITE_TOKEN`, `UPSTASH_REDIS_REST_URL`, and `UPSTASH_REDIS_REST_TOKEN`.

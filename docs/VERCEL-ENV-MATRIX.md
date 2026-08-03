@@ -19,7 +19,7 @@ Use separate values for `Preview` and `Production`. Do not point preview deploym
 | Variable | Preview | Production | Required | Notes |
 | --- | --- | --- | --- | --- |
 | `DATABASE_URL` | preview pooled runtime URL | production pooled runtime URL | yes | Runtime Prisma connection string. |
-| `DIRECT_DATABASE_URL` | preview direct URL | production direct URL | yes | Used for `prisma migrate deploy`. |
+| `DIRECT_URL` | preview direct URL | production direct URL | yes | Used for `prisma migrate deploy`. |
 | `NEXTAUTH_URL` | stable protected preview URL | canonical public URL | yes | Recommended preview value: a dedicated preview alias such as `https://preview.londonnews.example.com`. |
 | `NEXT_PUBLIC_SITE_URL` | same as preview site URL | same as public site URL | yes | Used for canonicals, structured data, and public links. |
 | `NEXTAUTH_SECRET` | unique preview secret | unique production secret | yes | Generate long random secrets separately per environment. |
@@ -63,7 +63,7 @@ These are used by [.github/workflows/release-migrations.yml](/Users/sam/Document
 | Secret | Value |
 | --- | --- |
 | `DATABASE_URL` | production pooled runtime URL |
-| `DIRECT_DATABASE_URL` | production direct migration URL |
+| `DIRECT_URL` | production direct migration URL |
 | `NEXTAUTH_URL` | canonical public URL |
 | `NEXT_PUBLIC_SITE_URL` | canonical public URL |
 | `NEXTAUTH_SECRET` | production auth secret |

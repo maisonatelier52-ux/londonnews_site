@@ -194,7 +194,7 @@ For a production-like rehearsal, follow [docs/STAGING-CHECKLIST.md](./STAGING-CH
 - Article bodies are stored as structured blocks with a richer editor and revision logging
 - Public API endpoints exist for homepage, article, category, classifieds, and search payloads
 - Newsletter signups, public contact messages, and moderated classified enquiries persist to the database and are visible to editorial staff
-- PostgreSQL migration history is in place and the repo is wired for `DIRECT_DATABASE_URL`
+- PostgreSQL migration history is in place and the repo is wired for `DIRECT_URL`
 - Production baseline guards are in place for same-origin mutation checks, guest registration gating, Redis-backed rate limiting, Vercel cron secret enforcement, readiness probes, and security headers
 - Vercel Blob uploads are wired into article hero images, homepage SEO images, and classifieds images
 - Public API endpoints emit CDN cache headers and public fallbacks were removed from hosted runtime paths
