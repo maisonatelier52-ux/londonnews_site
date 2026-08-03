@@ -46,6 +46,8 @@ export default function SubmitClassifiedPage({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   const seo = buildSeo({
     title: "Submit a Classified | London News",
@@ -87,10 +89,40 @@ export default function SubmitClassifiedPage({
         image: "",
         expiresAt: ""
       });
+      setUploadError("");
     } catch {
       setError("The submission request failed. Please try again.");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function handleImageUpload(file: File | undefined) {
+    if (!file) return;
+
+    setUploading(true);
+    setUploadError("");
+
+    try {
+      const body = new FormData();
+      body.append("file", file);
+
+      const response = await fetch("/api/public/classifieds/upload-image", {
+        method: "POST",
+        body
+      });
+
+      const data = await response.json().catch(() => null);
+      if (!response.ok) {
+        setUploadError(data?.error || "Upload failed.");
+        return;
+      }
+
+      setForm((current) => ({ ...current, image: data.url || "" }));
+    } catch {
+      setUploadError("Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -256,13 +288,34 @@ export default function SubmitClassifiedPage({
                 </label>
 
                 <label className="block md:col-span-2">
-                  <span className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.22em] text-[#6a7280]">Image URL</span>
+                  <div className="mb-1 flex items-center justify-between gap-3">
+                    <span className="block text-[11px] font-semibold uppercase tracking-[0.22em] text-[#6a7280]">Image</span>
+                    <label className="cursor-pointer rounded-full border border-black/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#243144] transition hover:border-black">
+                      {uploading ? "Uploading..." : "Upload from device"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={uploading}
+                        onChange={(event) => void handleImageUpload(event.target.files?.[0])}
+                      />
+                    </label>
+                  </div>
                   <input
                     value={form.image}
                     onChange={(event) => setForm({ ...form, image: event.target.value })}
                     className="w-full rounded-xl border border-black/10 bg-[#f8f4ec] px-3 py-3 text-sm text-[#1a2433] outline-none transition focus:border-black/30"
-                    placeholder="https://..."
+                    placeholder="https://... (or upload an image above)"
                   />
+                  {uploadError ? <p className="mt-1 text-xs text-rose-700">{uploadError}</p> : null}
+                  {form.image ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={form.image}
+                      alt="Listing preview"
+                      className="mt-3 h-32 w-32 rounded-xl border border-black/10 object-cover"
+                    />
+                  ) : null}
                 </label>
               </div>
 

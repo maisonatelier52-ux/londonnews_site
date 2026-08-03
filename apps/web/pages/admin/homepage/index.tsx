@@ -60,14 +60,16 @@ export default function HomepageIndexPage({
   }
 
   async function activateHomepage(id: string) {
+    setBusy(true);
     await fetch(`/api/admin/homepages/${id}/activate`, { method: "POST" });
-    router.replace(router.asPath);
+    window.location.reload();
   }
 
   async function deleteHomepage(id: string) {
     if (!confirm("Delete this homepage? This cannot be undone.")) return;
+    setBusy(true);
     await fetch(`/api/admin/homepages/${id}`, { method: "DELETE" });
-    router.replace(router.asPath);
+    window.location.reload();
   }
 
   return (
