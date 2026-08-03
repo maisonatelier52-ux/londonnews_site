@@ -1,3 +1,5 @@
+import { formatDateTime } from "../../../lib/format-date";
+
 type VersionRow = {
   id: string;
   label?: string | null;
@@ -53,10 +55,10 @@ export function HomepageVersionsPanel({
                 </div>
 
                 <div className="mt-3 space-y-1 text-sm text-zinc-600">
-                  <div>Created {new Date(version.createdAt).toLocaleString()}</div>
-                  <div>Updated {new Date(version.updatedAt).toLocaleString()}</div>
-                  {version.scheduledFor ? <div>Scheduled {new Date(version.scheduledFor).toLocaleString()}</div> : null}
-                  {version.publishedAt ? <div>Published {new Date(version.publishedAt).toLocaleString()}</div> : null}
+                  <div>Created {formatDateTime(version.createdAt)}</div>
+                  <div>Updated {formatDateTime(version.updatedAt)}</div>
+                  {version.scheduledFor ? <div>Scheduled {formatDateTime(version.scheduledFor)}</div> : null}
+                  {version.publishedAt ? <div>Published {formatDateTime(version.publishedAt)}</div> : null}
                 </div>
               </div>
 

@@ -6,6 +6,7 @@ import { ClassifiedEditor } from "../../../components/admin/ClassifiedEditor";
 import { StatusBadge } from "../../../components/admin/StatusBadge";
 import { authOptions } from "../../api/auth/[...nextauth]";
 import { setNoStore } from "../../../lib/server/api";
+import { formatDateTime } from "../../../lib/format-date";
 import { canManageClassifieds } from "../../../utils/auth";
 import { prisma } from "../../../utils/prisma";
 
@@ -110,7 +111,7 @@ export default function ClassifiedDetailPage({
                   {enquiry.name} • {enquiry.email}
                 </p>
                 <p className="text-xs text-zinc-500">
-                  {new Date(enquiry.createdAt).toLocaleString()}
+                  {formatDateTime(enquiry.createdAt)}
                 </p>
               </div>
               {enquiry.phone ? (

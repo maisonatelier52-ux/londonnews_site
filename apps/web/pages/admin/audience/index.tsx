@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import AdminLayout from "../../../components/AdminLayout";
 import { authOptions } from "../../api/auth/[...nextauth]";
 import { setNoStore } from "../../../lib/server/api";
+import { formatDateTime } from "../../../lib/format-date";
 import { canManageAudience } from "../../../utils/auth";
 import { prisma } from "../../../utils/prisma";
 
@@ -82,7 +83,7 @@ export default function AudiencePage({
               <p className="text-sm font-semibold text-zinc-950">{subscriber.email}</p>
               <p className="mt-2 text-xs uppercase tracking-[0.18em] text-zinc-500">{subscriber.source}</p>
               <p className="mt-2 text-sm text-zinc-600">
-                {new Date(subscriber.createdAt).toLocaleString()}
+                {formatDateTime(subscriber.createdAt)}
               </p>
             </article>
           ))}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AdminHomepage,
   SECTION_PRESETS,
@@ -11,6 +11,7 @@ import { HomepageWorkflowBar } from "./HomepageWorkflowBar";
 import { HomepageVersionsPanel } from "./HomepageVersionsPanel";
 import { SectionEditor } from "./SectionEditor";
 import { MediaUploadField } from "../MediaUploadField";
+import { formatDateTime } from "../../../lib/format-date";
 
 export function HomepageWorkflowEditor({
   initialHomepage,
@@ -23,12 +24,20 @@ export function HomepageWorkflowEditor({
   const [versions, setVersions] = useState<any[]>(initialVersions || []);
   const [settingsText, setSettingsText] = useState(prettyJson(initialHomepage.settings));
   const [newPresetKey, setNewPresetKey] = useState<string>(SECTION_PRESETS[0].key);
-  const [draftLabel, setDraftLabel] = useState(`Draft ${new Date().toLocaleString()}`);
+  const [draftLabel, setDraftLabel] = useState("Draft");
   const [scheduledFor, setScheduledFor] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | undefined>(undefined);
+
+  // Set the timestamped default only after mount. Computing `new Date()` during
+  // the initial render would run once on the server and again on the client at a
+  // different instant (and possibly a different default locale), causing a
+  // hydration mismatch.
+  useEffect(() => {
+    setDraftLabel(`Draft ${formatDateTime(new Date())}`);
+  }, []);
 
   function buildPayload() {
     return {

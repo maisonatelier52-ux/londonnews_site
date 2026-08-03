@@ -2,6 +2,7 @@ import type { GetServerSideProps } from "next";
 import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 import { signIn } from "next-auth/react";
+import { Eye, EyeOff } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { isGuestRegistrationEnabled, isHostedRuntime } from "../lib/security/env";
 import { authOptions } from "./api/auth/[...nextauth]";
@@ -33,6 +34,7 @@ export const getServerSideProps: GetServerSideProps<LoginPageProps> = async ({ r
 export default function LoginPage({ registrationEnabled, showSeededCredentials }: LoginPageProps) {
   const [email, setEmail] = useState(showSeededCredentials ? "jmhv@londonnews.local" : "");
   const [password, setPassword] = useState(showSeededCredentials ? "LondonNews123!" : "");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -110,13 +112,25 @@ export default function LoginPage({ registrationEnabled, showSeededCredentials }
 
             <div>
               <label htmlFor="login-password" className="mb-2 block text-[11px] uppercase tracking-[0.24em] text-zinc-500">Password</label>
-              <input
-                id="login-password"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm"
-              />
+              <div className="relative">
+                <input
+                  id="login-password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="w-full rounded-xl border border-zinc-300 px-4 py-3 pr-11 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  tabIndex={-1}
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500 hover:text-zinc-900"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
 
             {error ? <p className="text-sm text-rose-700">{error}</p> : null}
@@ -148,7 +162,6 @@ export default function LoginPage({ registrationEnabled, showSeededCredentials }
     </div>
   );
 }
-
 
 // import type { GetServerSideProps } from "next";
 // import Link from "next/link";
@@ -250,8 +263,9 @@ export default function LoginPage({ registrationEnabled, showSeededCredentials }
 //         <section className="p-8 lg:p-10">
 //           <form onSubmit={handleSubmit} className="space-y-5">
 //             <div>
-//               <label className="mb-2 block text-[11px] uppercase tracking-[0.24em] text-zinc-500">Email</label>
+//               <label htmlFor="login-email" className="mb-2 block text-[11px] uppercase tracking-[0.24em] text-zinc-500">Email</label>
 //               <input
+//                 id="login-email"
 //                 type="email"
 //                 value={email}
 //                 onChange={(event) => setEmail(event.target.value)}
@@ -260,8 +274,9 @@ export default function LoginPage({ registrationEnabled, showSeededCredentials }
 //             </div>
 
 //             <div>
-//               <label className="mb-2 block text-[11px] uppercase tracking-[0.24em] text-zinc-500">Password</label>
+//               <label htmlFor="login-password" className="mb-2 block text-[11px] uppercase tracking-[0.24em] text-zinc-500">Password</label>
 //               <input
+//                 id="login-password"
 //                 type="password"
 //                 value={password}
 //                 onChange={(event) => setPassword(event.target.value)}

@@ -7,6 +7,7 @@ import AdminLayout from "../../../components/AdminLayout";
 import { Pagination } from "../../../components/admin/Pagination";
 import { StatusBadge } from "../../../components/admin/StatusBadge";
 import { setNoStore } from "../../../lib/server/api";
+import { formatDate, formatDateTime } from "../../../lib/format-date";
 import { authOptions } from "../../api/auth/[...nextauth]";
 import { canManageClassifieds } from "../../../utils/auth";
 import { prisma } from "../../../utils/prisma";
@@ -252,10 +253,10 @@ export default function ClassifiedsAdminIndexPage({
                   </td>
                   <td className="px-4 py-4"><StatusBadge label={item.status} /></td>
                   <td className="px-4 py-4 text-zinc-500">
-                    {item.expiresAt ? new Date(item.expiresAt).toLocaleDateString("en-GB") : "No expiry"}
+                    {item.expiresAt ? formatDate(item.expiresAt) : "No expiry"}
                   </td>
                   <td className="px-4 py-4 text-zinc-500">
-                    {new Date(item.updatedAt).toLocaleString()}
+                    {formatDateTime(item.updatedAt)}
                   </td>
                 </tr>
               ))}

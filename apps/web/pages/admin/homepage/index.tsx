@@ -8,6 +8,7 @@ import { authOptions } from "../../api/auth/[...nextauth]";
 import { setNoStore } from "../../../lib/server/api";
 import { prisma } from "../../../utils/prisma";
 import { canDeleteHomepage, canManageHomepage, hydrateHomepage } from "../../../lib/admin/homepage-utils";
+import { formatDateTime } from "../../../lib/format-date";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   setNoStore(ctx.res);
@@ -123,7 +124,7 @@ export default function HomepageIndexPage({
                   </div>
                   <p className="mt-2 text-sm text-zinc-600">/{homepage.slug}</p>
                   <p className="mt-3 text-sm leading-7 text-zinc-700">
-                    {homepage._count.sections} sections • Updated {new Date(homepage.updatedAt).toLocaleString()}
+                    {homepage._count.sections} sections • Updated {formatDateTime(homepage.updatedAt)}
                   </p>
                 </div>
 

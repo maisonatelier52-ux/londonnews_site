@@ -6,6 +6,7 @@ import AdminLayout from "../../../components/AdminLayout";
 import type { AdminUserView } from "../../../lib/admin/users";
 import { listAdminUsers } from "../../../lib/admin/users";
 import { setNoStore } from "../../../lib/server/api";
+import { formatDateTime } from "../../../lib/format-date";
 import { authOptions } from "../../api/auth/[...nextauth]";
 import { ROLE_OPTIONS, canManageUsers, roleLabel } from "../../../utils/auth";
 
@@ -317,7 +318,7 @@ function EditableUserCard({ user, sessionUserId }: EditableUserCardProps) {
       </form>
 
       <p className="mt-4 text-xs uppercase tracking-[0.18em] text-zinc-500">
-        Updated {new Date(user.updatedAt).toLocaleString()}
+        Updated {formatDateTime(user.updatedAt)}
       </p>
     </article>
   );

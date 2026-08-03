@@ -8,6 +8,7 @@ import AdminLayout from "../../../components/AdminLayout";
 import { Pagination } from "../../../components/admin/Pagination";
 import { StatusBadge } from "../../../components/admin/StatusBadge";
 import { setNoStore } from "../../../lib/server/api";
+import { formatDateTime } from "../../../lib/format-date";
 import { authOptions } from "../../api/auth/[...nextauth]";
 import { prisma } from "../../../utils/prisma";
 import { isAuthorScopedRole } from "../../../utils/auth";
@@ -241,12 +242,12 @@ export default function ArticlesIndexPage({
                   <td className="px-4 py-4 text-zinc-700">{article.author?.name || "Unknown"}</td>
                   <td className="px-4 py-4"><StatusBadge label={article.status} /></td>
                   <td className="px-4 py-4 text-xs leading-6 text-zinc-500">
-                    {article.publishedAt ? <div>Live since {new Date(article.publishedAt).toLocaleString()}</div> : <div>Not live</div>}
-                    {article.scheduledPublishAt ? <div>Publish {new Date(article.scheduledPublishAt).toLocaleString()}</div> : null}
-                    {article.scheduledUnpublishAt ? <div>Unpublish {new Date(article.scheduledUnpublishAt).toLocaleString()}</div> : null}
+                    {article.publishedAt ? <div>Live since {formatDateTime(article.publishedAt)}</div> : <div>Not live</div>}
+                    {article.scheduledPublishAt ? <div>Publish {formatDateTime(article.scheduledPublishAt)}</div> : null}
+                    {article.scheduledUnpublishAt ? <div>Unpublish {formatDateTime(article.scheduledUnpublishAt)}</div> : null}
                   </td>
                   <td className="px-4 py-4 text-zinc-500">
-                    {new Date(article.updatedAt).toLocaleString()}
+                    {formatDateTime(article.updatedAt)}
                   </td>
                 </tr>
               ))}

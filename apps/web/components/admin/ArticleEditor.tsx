@@ -11,6 +11,7 @@ import { slugify } from "../../utils/slug";
 import { canDeleteArticles, canPublishArticles, canReviewArticles } from "../../utils/auth";
 import { StatusBadge } from "./StatusBadge";
 import { MediaUploadField } from "./MediaUploadField";
+import { formatDateTime } from "../../lib/format-date";
 
 type SectionOption = {
   id: string;
@@ -603,7 +604,7 @@ export function ArticleEditor({
                         </div>
                         <div>
                           <p className="font-semibold text-zinc-950">London News desk</p>
-                          <p>{article.publishedAt ? `Published ${new Date(article.publishedAt).toLocaleString()}` : "Not published yet"}</p>
+                          <p>{article.publishedAt ? `Published ${formatDateTime(article.publishedAt)}` : "Not published yet"}</p>
                         </div>
                       </div>
                     </div>
@@ -791,7 +792,7 @@ export function ArticleEditor({
               <p className="text-[11px] uppercase tracking-[0.22em] text-zinc-500">Current route</p>
               <p className="mt-2 break-all text-sm font-semibold text-zinc-950">{publicPath}</p>
               <p className="mt-3 text-sm leading-6 text-zinc-600">
-                {article.publishedAt ? `Last published ${new Date(article.publishedAt).toLocaleString()}.` : "This story has not been published yet."}
+                {article.publishedAt ? `Last published ${formatDateTime(article.publishedAt)}.` : "This story has not been published yet."}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {previewUrl ? (
@@ -849,12 +850,12 @@ export function ArticleEditor({
                 <div className="mt-4 space-y-2 text-sm text-zinc-600">
                   <p>
                     {article.scheduledPublishAt
-                      ? `Scheduled to publish ${new Date(article.scheduledPublishAt).toLocaleString()}.`
+                      ? `Scheduled to publish ${formatDateTime(article.scheduledPublishAt)}.`
                       : "No publish time is scheduled."}
                   </p>
                   <p>
                     {article.scheduledUnpublishAt
-                      ? `Scheduled to unpublish ${new Date(article.scheduledUnpublishAt).toLocaleString()}.`
+                      ? `Scheduled to unpublish ${formatDateTime(article.scheduledUnpublishAt)}.`
                       : "No takedown time is scheduled."}
                   </p>
                 </div>
@@ -971,7 +972,7 @@ export function ArticleEditor({
                         Correction note
                       </p>
                       <p className="text-xs text-zinc-500">
-                        {new Date(correction.createdAt).toLocaleString()}
+                        {formatDateTime(correction.createdAt)}
                       </p>
                     </div>
                     <p className="mt-2 text-sm font-medium text-zinc-900">
@@ -1002,7 +1003,7 @@ export function ArticleEditor({
                       {revision.action.replace(/_/g, " ")}
                     </p>
                     <p className="text-xs text-zinc-500">
-                      {new Date(revision.createdAt).toLocaleString()}
+                      {formatDateTime(revision.createdAt)}
                     </p>
                   </div>
                   <p className="mt-2 text-sm font-medium text-zinc-900">

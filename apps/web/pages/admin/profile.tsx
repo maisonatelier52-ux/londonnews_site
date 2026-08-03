@@ -9,6 +9,7 @@ import { MediaUploadField } from "../../components/admin/MediaUploadField";
 import { UserAvatar } from "../../components/admin/UserAvatar";
 import { getAdminUserById } from "../../lib/admin/users";
 import { setNoStore } from "../../lib/server/api";
+import { formatDateTime } from "../../lib/format-date";
 import { roleLabel } from "../../utils/auth";
 import { authOptions } from "../api/auth/[...nextauth]";
 
@@ -275,7 +276,7 @@ export default function ProfilePage({
 
           <div className="flex items-center justify-between gap-4">
             <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-              Last updated {new Date(updatedAt).toLocaleString()}
+              Last updated {formatDateTime(updatedAt)}
             </p>
             <button
               type="submit"
