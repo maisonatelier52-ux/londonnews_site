@@ -29,6 +29,7 @@ export function NewsletterSignupForm({
           source
         })
       });
+
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
@@ -46,8 +47,9 @@ export function NewsletterSignupForm({
   }
 
   const inputClassName = dark
-    ? "w-full border border-white/10 bg-white/6 px-4 py-3 text-sm text-white placeholder:text-white/38 focus:border-[var(--accent)] focus:outline-none"
-    : "border border-white/12 bg-white/6 px-4 py-3 text-sm text-white placeholder:text-white/36 focus:border-[var(--accent)] focus:outline-none";
+    ? "w-full border border-white/10 bg-white/6 px-4 py-3 text-sm text-black placeholder:text-black/40 focus:border-[var(--accent)] focus:outline-none"
+    : "border border-white/12 bg-white/6 px-4 py-3 text-sm text-black placeholder:text-black/40 focus:border-[var(--accent)] focus:outline-none";
+
   const messageClassName = dark ? "text-white/76" : "text-white/82";
   const errorClassName = dark ? "text-rose-200" : "text-rose-100";
 
@@ -62,6 +64,7 @@ export function NewsletterSignupForm({
         className={inputClassName}
         required
       />
+
       <button
         type="submit"
         disabled={busy || !email.trim()}
@@ -69,8 +72,18 @@ export function NewsletterSignupForm({
       >
         {busy ? "Submitting..." : buttonLabel}
       </button>
-      {message ? <p className={`text-sm ${messageClassName}`}>{message}</p> : null}
-      {error ? <p className={`text-sm ${errorClassName}`}>{error}</p> : null}
+
+      {message ? (
+        <p className={`text-sm ${messageClassName}`}>
+          {message}
+        </p>
+      ) : null}
+
+      {error ? (
+        <p className={`text-sm ${errorClassName}`}>
+          {error}
+        </p>
+      ) : null}
     </form>
   );
 }

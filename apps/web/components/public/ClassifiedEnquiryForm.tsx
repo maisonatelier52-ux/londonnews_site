@@ -7,6 +7,7 @@ export function ClassifiedEnquiryForm({ slug, title }: { slug: string; title: st
     phone: "",
     message: `I'm interested in "${title}". Please contact me with the next steps.`
   });
+
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -27,6 +28,7 @@ export function ClassifiedEnquiryForm({ slug, title }: { slug: string; title: st
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form)
       });
+
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
@@ -35,6 +37,7 @@ export function ClassifiedEnquiryForm({ slug, title }: { slug: string; title: st
       }
 
       setMessage(data?.message || "Your enquiry has been sent.");
+
       setForm({
         name: "",
         email: "",
@@ -48,38 +51,45 @@ export function ClassifiedEnquiryForm({ slug, title }: { slug: string; title: st
     }
   }
 
+  const inputClassName =
+    "w-full rounded-xl border border-white/14 bg-white/6 px-3 py-3 text-sm text-black placeholder:text-black/40 outline-none transition focus:border-white/28";
+
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="grid gap-4">
         <input
           value={form.name}
           onChange={(event) => updateField("name", event.target.value)}
-          className="w-full rounded-xl border border-white/14 bg-white/6 px-3 py-3 text-sm text-white placeholder:text-white/45 outline-none transition focus:border-white/28"
+          className={inputClassName}
           placeholder="Your name"
           required
         />
+
         <input
           type="email"
           value={form.email}
           onChange={(event) => updateField("email", event.target.value)}
-          className="w-full rounded-xl border border-white/14 bg-white/6 px-3 py-3 text-sm text-white placeholder:text-white/45 outline-none transition focus:border-white/28"
+          className={inputClassName}
           placeholder="Email address"
           required
         />
+
         <input
           value={form.phone}
           onChange={(event) => updateField("phone", event.target.value)}
-          className="w-full rounded-xl border border-white/14 bg-white/6 px-3 py-3 text-sm text-white placeholder:text-white/45 outline-none transition focus:border-white/28"
+          className={inputClassName}
           placeholder="Phone number (optional)"
         />
+
         <textarea
           value={form.message}
           onChange={(event) => updateField("message", event.target.value)}
-          className="min-h-[150px] w-full rounded-xl border border-white/14 bg-white/6 px-3 py-3 text-sm text-white placeholder:text-white/45 outline-none transition focus:border-white/28"
+          className={`${inputClassName} min-h-[150px]`}
           placeholder="Your enquiry"
           required
         />
       </div>
+
       <button
         type="submit"
         disabled={busy}
@@ -87,8 +97,18 @@ export function ClassifiedEnquiryForm({ slug, title }: { slug: string; title: st
       >
         {busy ? "Sending..." : "Send enquiry"}
       </button>
-      {message ? <p className="text-sm text-emerald-200">{message}</p> : null}
-      {error ? <p className="text-sm text-rose-200">{error}</p> : null}
+
+      {message ? (
+        <p className="text-sm text-emerald-200">
+          {message}
+        </p>
+      ) : null}
+
+      {error ? (
+        <p className="text-sm text-rose-200">
+          {error}
+        </p>
+      ) : null}
     </form>
   );
 }

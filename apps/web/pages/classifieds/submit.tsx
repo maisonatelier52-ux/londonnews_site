@@ -1,3 +1,4 @@
+// apps/web/pages/classifieds/submit.tsx
 import type { GetStaticProps, InferGetStaticPropsType } from "next";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
