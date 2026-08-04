@@ -139,7 +139,7 @@ export async function getHomepagePreviewByToken(token: string): Promise<{ homepa
     seo: {
       title: snapshot.seoTitle || snapshot.title || "Homepage preview",
       description: snapshot.seoDescription || "Preview of the London News homepage draft.",
-      image: snapshot.seoImage || (leadStorySlot ? byId.get(leadStorySlot.articleId || "")?.heroImage : undefined),
+      image: snapshot.seoImage || (leadStorySlot ? byId.get(leadStorySlot.articleId || "")?.heroImage : null) || null,
     },
   };
 

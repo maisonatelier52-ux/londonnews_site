@@ -123,7 +123,7 @@ export async function getActiveHomepageData(): Promise<HomepageView | null> {
         description:
           homepage.seoDescription ||
           "A modern London newsroom homepage rebuilt in a legacy-newspaper visual system.",
-        image: homepage.seoImage || (leadStory?.article?.heroImage ?? undefined),
+        image: homepage.seoImage || (leadStory?.article?.heroImage ?? null),
       },
     };
   } catch (error) {

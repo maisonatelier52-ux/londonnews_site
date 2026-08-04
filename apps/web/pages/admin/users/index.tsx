@@ -1,7 +1,7 @@
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { getServerSession } from "next-auth/next";
 import { useRouter } from "next/router";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import AdminLayout from "../../../components/AdminLayout";
 import type { AdminUserView } from "../../../lib/admin/users";
 import { listAdminUsers } from "../../../lib/admin/users";
@@ -16,9 +16,12 @@ type PageProps = {
   dataUnavailable: boolean;
 };
 
+type Toast = { type: "success" | "error"; text: string } | null;
+
 type EditableUserCardProps = {
   user: AdminUserView;
   sessionUserId: string;
+  notify: (toast: NonNullable<Toast>) => void;
 };
 
 export const getServerSideProps: GetServerSideProps<PageProps> = async ({ req, res }) => {
@@ -52,19 +55,17 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async ({ req, r
   }
 };
 
-function CreateUserForm() {
+function CreateUserForm({ notify }: { notify: (toast: NonNullable<Toast>) => void }) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<(typeof ROLE_OPTIONS)[number]>("EDITOR");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
-    setError("");
 
     const response = await fetch("/api/admin/users", {
       method: "POST",
@@ -80,12 +81,14 @@ function CreateUserForm() {
     });
 
     const payload = await response.json().catch(() => ({}));
+    setBusy(false);
+
     if (!response.ok) {
-      setBusy(false);
-      setError(payload.error || "Unable to create that account.");
+      notify({ type: "error", text: payload.error || "Unable to create that account." });
       return;
     }
 
+    notify({ type: "success", text: "User created." });
     await router.replace(router.asPath);
   }
 
@@ -151,29 +154,21 @@ function CreateUserForm() {
           {busy ? "Creating..." : "Create user"}
         </button>
       </div>
-
-      {error ? (
-        <p className="lg:col-span-full rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-          {error}
-        </p>
-      ) : null}
     </form>
   );
 }
 
-function EditableUserCard({ user, sessionUserId }: EditableUserCardProps) {
+function EditableUserCard({ user, sessionUserId, notify }: EditableUserCardProps) {
   const router = useRouter();
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [role, setRole] = useState(user.role);
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
-    setError("");
 
     const response = await fetch(`/api/admin/users/${user.id}`, {
       method: "PUT",
@@ -189,12 +184,15 @@ function EditableUserCard({ user, sessionUserId }: EditableUserCardProps) {
     });
 
     const payload = await response.json().catch(() => ({}));
+    setBusy(false);
+
     if (!response.ok) {
-      setBusy(false);
-      setError(payload.error || "Unable to save that user.");
+      notify({ type: "error", text: payload.error || "Unable to save that user." });
       return;
     }
 
+    setPassword("");
+    notify({ type: "success", text: `Saved changes for ${name}.` });
     await router.replace(router.asPath);
   }
 
@@ -309,12 +307,6 @@ function EditableUserCard({ user, sessionUserId }: EditableUserCardProps) {
             {busy ? "Saving..." : "Save changes"}
           </button>
         </div>
-
-        {error ? (
-          <p className="lg:col-span-full rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-            {error}
-          </p>
-        ) : null}
       </form>
 
       <p className="mt-4 text-xs uppercase tracking-[0.18em] text-zinc-500">
@@ -331,9 +323,29 @@ export default function UsersPage({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const seededCount = users.filter((user) => user.isSeeded).length;
   const managerCount = users.filter((user) => user.isManager).length;
+  const [toast, setToast] = useState<Toast>(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   return (
     <AdminLayout>
+      {toast ? (
+        <div
+          role="status"
+          className={`fixed right-6 top-6 z-50 max-w-sm rounded-2xl border px-5 py-4 text-sm font-semibold shadow-xl ${
+            toast.type === "success"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+              : "border-red-200 bg-red-50 text-red-700"
+          }`}
+        >
+          {toast.text}
+        </div>
+      ) : null}
+
       <section className="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm">
         <p className="text-[11px] uppercase tracking-[0.24em] text-zinc-500">User roles</p>
         <h1 className="mt-2 font-news text-5xl text-zinc-950">Newsroom access</h1>
@@ -362,7 +374,7 @@ export default function UsersPage({
             Use 12+ character passwords. Leave existing user passwords blank unless you are rotating them intentionally.
           </p>
           <div className="mt-4">
-            <CreateUserForm />
+            <CreateUserForm notify={setToast} />
           </div>
         </div>
 
@@ -375,7 +387,7 @@ export default function UsersPage({
 
       <section className="grid gap-4">
         {users.map((user) => (
-          <EditableUserCard key={user.id} user={user} sessionUserId={sessionUserId} />
+          <EditableUserCard key={user.id} user={user} sessionUserId={sessionUserId} notify={setToast} />
         ))}
 
         {!dataUnavailable && users.length === 0 ? (

@@ -17,11 +17,13 @@ export function HomepageVersionsPanel({
   onLoadSnapshot,
   onPublishVersion,
   onScheduleVersion,
+  onDeleteVersion,
 }: {
   versions: VersionRow[];
   onLoadSnapshot: (snapshot: any) => void;
   onPublishVersion: (versionId: string) => void;
   onScheduleVersion: (versionId: string) => void;
+  onDeleteVersion: (versionId: string) => void;
 }) {
   return (
     <section className="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm">
@@ -62,11 +64,11 @@ export function HomepageVersionsPanel({
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => onLoadSnapshot(version.snapshot)}
-                  className="rounded-xl border border-zinc-300 px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-zinc-700"
+                  className="rounded-lg border border-zinc-300 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-zinc-700"
                 >
                   Load draft
                 </button>
@@ -74,23 +76,34 @@ export function HomepageVersionsPanel({
                   href={version.previewUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-xl border border-zinc-300 px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-zinc-700"
+                  className="rounded-lg border border-zinc-300 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-zinc-700"
                 >
                   Preview
                 </a>
                 <button
                   type="button"
                   onClick={() => onScheduleVersion(version.id)}
-                  className="rounded-xl border border-amber-500 px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700"
+                  className="rounded-lg border border-amber-500 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-amber-700"
                 >
                   Schedule
                 </button>
                 <button
                   type="button"
                   onClick={() => onPublishVersion(version.id)}
-                  className="rounded-xl bg-zinc-950 px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white"
+                  className="rounded-lg bg-zinc-950 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-white"
                 >
                   Publish now
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm(`Delete "${version.label || "Untitled version"}"? This cannot be undone.`)) {
+                      onDeleteVersion(version.id);
+                    }
+                  }}
+                  className="rounded-lg border border-red-300 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-red-700"
+                >
+                  Delete
                 </button>
               </div>
             </div>

@@ -30,8 +30,8 @@ export type StoryCardData = {
   title: string;
   excerpt: string;
   href: string;
-  image?: string;
-  kicker?: string;
+  image?: string | null;
+  kicker?: string | null;
   readLabel?: string;
 };
 
@@ -106,7 +106,7 @@ export type HomepageView = {
   seo?: {
     title?: string;
     description?: string;
-    image?: string;
+    image?: string | null;
   };
 };
 

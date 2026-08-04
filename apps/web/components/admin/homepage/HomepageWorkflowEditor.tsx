@@ -13,6 +13,8 @@ import { SectionEditor } from "./SectionEditor";
 import { MediaUploadField } from "../MediaUploadField";
 import { formatDateTime } from "../../../lib/format-date";
 
+type Toast = { type: "success" | "error"; text: string } | null;
+
 export function HomepageWorkflowEditor({
   initialHomepage,
   initialVersions,
@@ -27,9 +29,8 @@ export function HomepageWorkflowEditor({
   const [draftLabel, setDraftLabel] = useState("Draft");
   const [scheduledFor, setScheduledFor] = useState("");
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | undefined>(undefined);
+  const [toast, setToast] = useState<Toast>(null);
 
   // Set the timestamped default only after mount. Computing `new Date()` during
   // the initial render would run once on the server and again on the client at a
@@ -38,6 +39,13 @@ export function HomepageWorkflowEditor({
   useEffect(() => {
     setDraftLabel(`Draft ${formatDateTime(new Date())}`);
   }, []);
+
+  // Pop-up confirmation: show briefly, then auto-dismiss.
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   function buildPayload() {
     return {
@@ -83,10 +91,13 @@ export function HomepageWorkflowEditor({
     if (res.ok) setVersions(data);
   }
 
+  // Save draft, publish, and schedule all send the current editor state
+  // (buildPayload()) straight to their endpoint when no versionId is given,
+  // so every one of these already saves whatever is currently in the editor
+  // - there's no separate "save" step needed first.
+
   async function saveDraft() {
     setBusy(true);
-    setMessage("");
-    setError("");
 
     const res = await fetch(`/api/admin/homepages/${homepage.id}/draft`, {
       method: "POST",
@@ -100,19 +111,17 @@ export function HomepageWorkflowEditor({
     setBusy(false);
 
     if (!res.ok) {
-      setError(data?.error || "Failed to save draft.");
+      setToast({ type: "error", text: data?.error || "Failed to save draft." });
       return;
     }
 
     setPreviewUrl(data.previewUrl);
-    setMessage("Draft saved.");
+    setToast({ type: "success", text: "Draft saved." });
     await refreshVersions();
   }
 
   async function publishNow(versionId?: string) {
     setBusy(true);
-    setMessage("");
-    setError("");
 
     const res = await fetch(`/api/admin/homepages/${homepage.id}/publish`, {
       method: "POST",
@@ -127,25 +136,23 @@ export function HomepageWorkflowEditor({
     setBusy(false);
 
     if (!res.ok) {
-      setError(data?.error || "Failed to publish homepage.");
+      setToast({ type: "error", text: data?.error || "Failed to publish homepage." });
       return;
     }
 
     setPreviewUrl(data?.version?.previewUrl || previewUrl);
     setHomepage({ ...homepage, isActive: true });
-    setMessage("Homepage published and activated.");
+    setToast({ type: "success", text: "Homepage published and activated." });
     await refreshVersions();
   }
 
   async function schedule(versionId?: string) {
     if (!scheduledFor) {
-      setError("Choose a publish date/time first.");
+      setToast({ type: "error", text: "Choose a publish date/time first." });
       return;
     }
 
     setBusy(true);
-    setMessage("");
-    setError("");
 
     const res = await fetch(`/api/admin/homepages/${homepage.id}/schedule`, {
       method: "POST",
@@ -160,12 +167,30 @@ export function HomepageWorkflowEditor({
     setBusy(false);
 
     if (!res.ok) {
-      setError(data?.error || "Failed to schedule homepage.");
+      setToast({ type: "error", text: data?.error || "Failed to schedule homepage." });
       return;
     }
 
     setPreviewUrl(data.previewUrl || previewUrl);
-    setMessage("Homepage scheduled.");
+    setToast({ type: "success", text: "Homepage scheduled." });
+    await refreshVersions();
+  }
+
+  async function deleteVersion(versionId: string) {
+    setBusy(true);
+
+    const res = await fetch(`/api/admin/homepages/${homepage.id}/versions/${versionId}`, {
+      method: "DELETE",
+    });
+    const data = await res.json().catch(() => null);
+    setBusy(false);
+
+    if (!res.ok) {
+      setToast({ type: "error", text: data?.error || "Failed to delete version." });
+      return;
+    }
+
+    setToast({ type: "success", text: "Version deleted." });
     await refreshVersions();
   }
 
@@ -181,11 +206,24 @@ export function HomepageWorkflowEditor({
       sections: snapshot.sections || [],
     });
     setSettingsText(prettyJson(snapshot.settings || {}));
-    setMessage("Loaded version into editor.");
+    setToast({ type: "success", text: "Loaded version into editor." });
   }
 
   return (
     <div className="space-y-8">
+      {toast ? (
+        <div
+          role="status"
+          className={`fixed right-6 top-6 z-50 max-w-sm rounded-2xl border px-5 py-4 text-sm font-semibold shadow-xl ${
+            toast.type === "success"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+              : "border-red-200 bg-red-50 text-red-700"
+          }`}
+        >
+          {toast.text}
+        </div>
+      ) : null}
+
       <section className="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm">
         <div className="grid gap-4 md:grid-cols-2">
           <label className="block">
@@ -234,9 +272,6 @@ export function HomepageWorkflowEditor({
             />
           </label>
         </div>
-
-        {message ? <p className="mt-4 text-sm text-emerald-700">{message}</p> : null}
-        {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
       </section>
 
       <HomepageWorkflowBar
@@ -319,6 +354,7 @@ export function HomepageWorkflowEditor({
         onLoadSnapshot={loadSnapshot}
         onPublishVersion={(versionId) => publishNow(versionId)}
         onScheduleVersion={(versionId) => schedule(versionId)}
+        onDeleteVersion={(versionId) => deleteVersion(versionId)}
       />
     </div>
   );

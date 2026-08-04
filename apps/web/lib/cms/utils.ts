@@ -51,8 +51,8 @@ export function mapArticleToStoryCard(article: any, overrides?: any): StoryCardD
     title: overrides?.titleOverride || article?.title || "Untitled story",
     excerpt: truncate(rawExcerpt || "No summary available.", 180),
     href,
-    image: overrides?.imageOverride || article?.heroImage || article?.seo?.socialImage || undefined,
-    kicker: overrides?.kickerOverride || undefined,
+    image: overrides?.imageOverride || article?.heroImage || article?.seo?.socialImage || null,
+    kicker: overrides?.kickerOverride || null,
     readLabel: overrides?.readLabel || "Read more",
   };
 }
