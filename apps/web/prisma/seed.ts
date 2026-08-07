@@ -86,7 +86,7 @@ type SeedStory = {
   section: string;
   excerpt: string;
   dek: string;
-  image?: string;
+  image?: string | null;
   heroAlt?: string;
   authorEmail: string;
   content: string;
