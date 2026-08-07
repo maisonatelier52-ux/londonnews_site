@@ -35,7 +35,7 @@ test("public APIs expose readiness and CDN cache headers", async ({ request }) =
 test("admin login and homepage desk render", async ({ page }) => {
   await page.goto("/login");
   await page.getByLabel("Email").fill("jmhv@londonnews.local");
-  await page.getByLabel("Password").fill("LondonNews123!");
+  await page.locator("#login-password").fill("LondonNews123!");
   await page.getByRole("button", { name: "Enter newsroom" }).click();
 
   await page.waitForURL("**/admin");
