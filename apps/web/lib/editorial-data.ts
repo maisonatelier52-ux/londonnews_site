@@ -11,8 +11,8 @@ export type StoryCardData = {
   title: string;
   excerpt: string;
   href: string;
-  image?: string;
-  kicker?: string;
+  image?: string | null;
+  kicker?: string | null;
   readLabel?: string;
 };
 
