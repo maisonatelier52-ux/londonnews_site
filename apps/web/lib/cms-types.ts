@@ -180,7 +180,7 @@ export type CategoryView = {
   seo?: {
     title?: string;
     description?: string;
-    image?: string;
+    image?: string | null;
   };
 };
 
