@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import { type FormEvent, useState } from "react";
 import AdminLayout from "../../components/AdminLayout";
 import { MediaUploadField } from "../../components/admin/MediaUploadField";
+import { PasswordField } from "../../components/admin/PasswordField";
 import { UserAvatar } from "../../components/admin/UserAvatar";
 import { getAdminUserById } from "../../lib/admin/users";
 import { setNoStore } from "../../lib/server/api";
@@ -220,47 +221,29 @@ export default function ProfilePage({
             </p>
 
             <div className="mt-4 grid gap-4 lg:grid-cols-3">
-              <label className="block">
-                <span className="mb-2 block text-[11px] uppercase tracking-[0.22em] text-zinc-500">
-                  Current password
-                </span>
-                <input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(event) => setCurrentPassword(event.target.value)}
-                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm"
-                  autoComplete="current-password"
-                />
-              </label>
+              <PasswordField
+                label="Current password"
+                value={currentPassword}
+                onChange={setCurrentPassword}
+                autoComplete="current-password"
+              />
 
-              <label className="block">
-                <span className="mb-2 block text-[11px] uppercase tracking-[0.22em] text-zinc-500">
-                  New password
-                </span>
-                <input
-                  type="password"
-                  minLength={12}
-                  value={newPassword}
-                  onChange={(event) => setNewPassword(event.target.value)}
-                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm"
-                  placeholder="Minimum 12 characters"
-                  autoComplete="new-password"
-                />
-              </label>
+              <PasswordField
+                label="New password"
+                value={newPassword}
+                onChange={setNewPassword}
+                minLength={12}
+                placeholder="Minimum 12 characters"
+                autoComplete="new-password"
+              />
 
-              <label className="block">
-                <span className="mb-2 block text-[11px] uppercase tracking-[0.22em] text-zinc-500">
-                  Confirm new password
-                </span>
-                <input
-                  type="password"
-                  minLength={12}
-                  value={confirmPassword}
-                  onChange={(event) => setConfirmPassword(event.target.value)}
-                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm"
-                  autoComplete="new-password"
-                />
-              </label>
+              <PasswordField
+                label="Confirm new password"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+                minLength={12}
+                autoComplete="new-password"
+              />
             </div>
           </div>
 

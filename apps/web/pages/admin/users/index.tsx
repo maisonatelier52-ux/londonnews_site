@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { useRouter } from "next/router";
 import { type FormEvent, useEffect, useState } from "react";
 import AdminLayout from "../../../components/AdminLayout";
+import { PasswordField } from "../../../components/admin/PasswordField";
 import type { AdminUserView } from "../../../lib/admin/users";
 import { listAdminUsers } from "../../../lib/admin/users";
 import { setNoStore } from "../../../lib/server/api";
@@ -132,18 +133,14 @@ function CreateUserForm({ notify }: { notify: (toast: NonNullable<Toast>) => voi
         </select>
       </label>
 
-      <label className="block">
-        <span className="mb-2 block text-[11px] uppercase tracking-[0.22em] text-zinc-500">Strong password</span>
-        <input
-          type="password"
-          minLength={12}
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm"
-          placeholder="Minimum 12 characters"
-          required
-        />
-      </label>
+      <PasswordField
+        label="Strong password"
+        value={password}
+        onChange={setPassword}
+        minLength={12}
+        placeholder="Minimum 12 characters"
+        required
+      />
 
       <div className="flex items-end">
         <button
@@ -286,17 +283,13 @@ function EditableUserCard({ user, sessionUserId, notify }: EditableUserCardProps
           </select>
         </label>
 
-        <label className="block">
-          <span className="mb-2 block text-[11px] uppercase tracking-[0.22em] text-zinc-500">New password</span>
-          <input
-            type="password"
-            minLength={12}
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm"
-            placeholder="Leave blank to keep current password"
-          />
-        </label>
+        <PasswordField
+          label="New password"
+          value={password}
+          onChange={setPassword}
+          minLength={12}
+          placeholder="Leave blank to keep current password"
+        />
 
         <div className="flex items-end">
           <button
