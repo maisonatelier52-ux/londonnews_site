@@ -8,6 +8,7 @@ import { setNoStore } from "../../../lib/server/api";
 import { prisma } from "../../../utils/prisma";
 import { canManageHomepage, hydrateHomepage, hydrateHomepageVersion } from "../../../lib/admin/homepage-utils";
 import { buildHomepagePreviewUrl } from "../../../lib/admin/homepage-workflow";
+import { ScheduleCountdown } from "../../../components/admin/homepage/ScheduleCountdown";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   setNoStore(ctx.res);
@@ -72,13 +73,20 @@ export default function HomepageWorkflowPage({
   homepage,
   versions,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const nextScheduled = (versions as any[])
+    .filter((version) => version.status === "SCHEDULED" && version.scheduledFor)
+    .sort((a, b) => new Date(a.scheduledFor).getTime() - new Date(b.scheduledFor).getTime())[0];
+
   return (
     <AdminLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-[11px] uppercase tracking-[0.24em] text-zinc-500">Homepage workflow</p>
-            <h1 className="mt-2 font-news text-5xl text-zinc-950">{homepage.title}</h1>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <h1 className="font-news text-5xl text-zinc-950">{homepage.title}</h1>
+              {nextScheduled ? <ScheduleCountdown scheduledFor={nextScheduled.scheduledFor} /> : null}
+            </div>
           </div>
 
           <Link

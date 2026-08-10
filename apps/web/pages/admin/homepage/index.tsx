@@ -9,6 +9,7 @@ import { setNoStore } from "../../../lib/server/api";
 import { prisma } from "../../../utils/prisma";
 import { canDeleteHomepage, canManageHomepage, hydrateHomepage } from "../../../lib/admin/homepage-utils";
 import { formatDateTime } from "../../../lib/format-date";
+import { ScheduleCountdown } from "../../../components/admin/homepage/ScheduleCountdown";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   setNoStore(ctx.res);
@@ -25,12 +26,26 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const homepages = await prisma.homepage.findMany({
     orderBy: [{ isActive: "desc" }, { updatedAt: "desc" }],
-    include: { _count: { select: { sections: true } } },
+    include: {
+      _count: { select: { sections: true } },
+      versions: {
+        where: { status: "SCHEDULED" },
+        orderBy: { scheduledFor: "asc" },
+        take: 1,
+      },
+    },
   }).catch(() => []);
 
   return {
     props: {
-      homepages: JSON.parse(JSON.stringify(homepages.map((homepage) => hydrateHomepage(homepage) || homepage))),
+      homepages: JSON.parse(
+        JSON.stringify(
+          homepages.map((homepage: any) => ({
+            ...(hydrateHomepage(homepage) || homepage),
+            nextScheduledFor: homepage.versions?.[0]?.scheduledFor || null,
+          }))
+        )
+      ),
       role,
     },
   };
@@ -121,6 +136,9 @@ export default function HomepageIndexPage({
                     <span className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${homepage.isActive ? "bg-emerald-100 text-emerald-800" : "bg-zinc-100 text-zinc-600"}`}>
                       {homepage.isActive ? "Live" : "Draft"}
                     </span>
+                    {homepage.nextScheduledFor ? (
+                      <ScheduleCountdown scheduledFor={homepage.nextScheduledFor} />
+                    ) : null}
                   </div>
                   <p className="mt-2 text-sm text-zinc-600">/{homepage.slug}</p>
                   <p className="mt-3 text-sm leading-7 text-zinc-700">
