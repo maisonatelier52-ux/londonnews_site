@@ -107,7 +107,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   } catch (error) {
     if (error instanceof MediaStorageError) {
-      return res.status(error.status).json({ error: error.message });
+      return res.status(error.status).json({
+        error: error.message,
+        ...(error.detail ? { detail: error.detail } : {})
+      });
     }
 
     const code = (error as { httpCode?: number } | null)?.httpCode;

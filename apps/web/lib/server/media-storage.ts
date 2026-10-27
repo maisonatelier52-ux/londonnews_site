@@ -44,11 +44,14 @@ function withTimeout<T>(promise: Promise<T>, ms: number, onTimeout: () => void) 
 
 export class MediaStorageError extends Error {
   status: number;
+  /** Underlying provider error text. Only returned to signed-in admins. */
+  detail?: string;
 
-  constructor(message: string, status = 500) {
+  constructor(message: string, status = 500, detail?: string) {
     super(message);
     this.name = "MediaStorageError";
     this.status = status;
+    this.detail = detail;
   }
 }
 
@@ -150,7 +153,8 @@ export async function storeImage({
       if (hosted) {
         throw new MediaStorageError(
           "Image storage rejected the upload. Check that BLOB_READ_WRITE_TOKEN is valid for this environment.",
-          502
+          502,
+          error instanceof Error ? error.message.slice(0, 300) : undefined
         );
       }
 
