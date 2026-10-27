@@ -12,6 +12,7 @@ export function PublicPageShell({
   title,
   description,
   actions,
+  showDeskLinks = true,
   children
 }: {
   homepage: HomepageView;
@@ -19,9 +20,13 @@ export function PublicPageShell({
   title: string;
   description: string;
   actions?: ReactNode;
+  /** Set to false when the page already renders its own desk/category links in `actions`. */
+  showDeskLinks?: boolean;
   children: ReactNode;
 }) {
-  const heroDeskLinks = homepage.nav.filter((item) => item.href !== "/" && item.href !== "/sections").slice(0, 5);
+  const heroDeskLinks = showDeskLinks
+    ? homepage.nav.filter((item) => item.href !== "/" && item.href !== "/sections").slice(0, 5)
+    : [];
   const frontPageLinks = homepage.topHeadlines.slice(0, 3);
 
   return (

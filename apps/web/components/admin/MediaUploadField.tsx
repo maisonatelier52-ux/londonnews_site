@@ -1,5 +1,8 @@
 import { useId, useState } from "react";
 
+// Vercel serverless functions reject request bodies above ~4.5 MB.
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+
 export function MediaUploadField({
   label,
   value,
@@ -20,12 +23,25 @@ export function MediaUploadField({
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  async function handleUpload(file: File | undefined) {
+  async function handleUpload(file: File | undefined, input: HTMLInputElement | null) {
     if (!file) return;
 
-    setUploading(true);
     setError("");
     setMessage("");
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please choose an image file (JPG, PNG, WebP, GIF or AVIF).");
+      if (input) input.value = "";
+      return;
+    }
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setError("Image is too large. Please choose one under 4 MB.");
+      if (input) input.value = "";
+      return;
+    }
+
+    setUploading(true);
 
     try {
       const body = new FormData();
@@ -34,21 +50,28 @@ export function MediaUploadField({
 
       const response = await fetch("/api/admin/media/upload", {
         method: "POST",
-        body
+        body,
+        credentials: "same-origin"
       });
 
       const data = await response.json().catch(() => null);
       if (!response.ok) {
-        setError(data?.error || "Upload failed.");
+        if (response.status === 413) {
+          setError("Image is too large. Please choose one under 4 MB.");
+        } else {
+          setError([data?.error || "Upload failed.", data?.detail].filter(Boolean).join(" - "));
+        }
         return;
       }
 
       onChange(data.url || "");
       setMessage("Image uploaded.");
     } catch {
-      setError("Upload failed.");
+      setError("Upload failed. Check your connection and try again.");
     } finally {
       setUploading(false);
+      // Allow picking the same file again after a failure.
+      if (input) input.value = "";
     }
   }
 
@@ -62,10 +85,10 @@ export function MediaUploadField({
           {uploading ? "Uploading..." : "Upload image"}
           <input
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
             className="hidden"
             disabled={uploading}
-            onChange={(event) => void handleUpload(event.target.files?.[0])}
+            onChange={(event) => void handleUpload(event.target.files?.[0], event.target)}
           />
         </label>
       </div>

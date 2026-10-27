@@ -64,6 +64,7 @@ export default function SectionsPage({
 
       <PublicPageShell
         homepage={homepage}
+        showDeskLinks={false}
         eyebrow="Taxonomy"
         title="Desks and topics"
         description="London News supports a fuller editorial category structure, with primary desks, specialist topic pages, and a dedicated classifieds section that sits outside the article taxonomy."

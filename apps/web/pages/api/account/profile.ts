@@ -22,7 +22,7 @@ const updateProfileSchema = z
       .max(2048)
       .optional()
       .or(z.literal(""))
-      .refine((value) => !value || /^https?:\/\//i.test(value), {
+            .refine((value) => !value || /^(https?:\/\/|\/(?!\/))/i.test(value), {
         message: "Avatar must be a valid image URL."
       }),
     currentPassword: z.string().optional().or(z.literal("")),

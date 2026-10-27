@@ -1,22 +1,23 @@
-import { readFile } from "node:fs/promises";
+import { readFile, unlink } from "node:fs/promises";
 import type { NextApiRequest, NextApiResponse } from "next";
 import formidable, { type File as FormidableFile } from "formidable";
-import { put } from "@vercel/blob";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../auth/[...nextauth]";
 import { canCreateArticles } from "../../../../utils/auth";
 import { applyRouteRateLimit, requireMethod, requireSameOrigin, setNoStore } from "../../../../lib/server/api";
 import { logEvent } from "../../../../lib/server/logger";
+import {
+  MediaStorageError,
+  describeFileHead,
+  detectImageType,
+  storeImage
+} from "../../../../lib/server/media-storage";
 
 export const config = {
   api: {
     bodyParser: false
   }
 };
-
-function sanitizeFilename(name: string) {
-  return name.replace(/[^a-zA-Z0-9._-]/g, "-");
-}
 
 function readSingleFile(input: FormidableFile | FormidableFile[] | undefined) {
   if (!input) return null;
@@ -71,9 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   );
   if (!ok) return;
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    return res.status(503).json({ error: "Blob storage is not configured." });
-  }
+  let tempPath: string | null = null;
 
   try {
     const { fields, files } = await parseMultipart(req);
@@ -83,27 +82,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: "Choose an image to upload." });
     }
 
-    if (!file.mimetype?.startsWith("image/")) {
-      return res.status(400).json({ error: "Only image uploads are supported." });
-    }
+    tempPath = file.filepath;
 
     const folderInput = Array.isArray(fields.folder) ? fields.folder[0] : fields.folder;
-    const folder = sanitizeFilename(String(folderInput || "uploads"));
-    const originalName = sanitizeFilename(file.originalFilename || "upload");
     const fileBuffer = await readFile(file.filepath);
 
-    const blob = await put(`${folder}/${originalName}`, fileBuffer, {
-      access: "public",
-      addRandomSuffix: true,
-      contentType: file.mimetype || undefined
+    const detectedType = detectImageType(fileBuffer);
+    if (!detectedType) {
+      return res.status(400).json({ error: "Unsupported image. Please upload a JPG, PNG, WebP, GIF or AVIF file (iPhone HEIC photos need converting first).",
+        ...(process.env.NODE_ENV !== "production" ? { detail: describeFileHead(fileBuffer) } : {})
+      });
+    }
+
+    const stored = await storeImage({
+      buffer: fileBuffer,
+      folder: String(folderInput || "uploads"),
+      originalName: file.originalFilename || "upload",
+      mimetype: detectedType
     });
 
     return res.status(201).json({
-      url: blob.url,
-      pathname: blob.pathname
+      url: stored.url,
+      pathname: stored.pathname
     });
   } catch (error) {
+    if (error instanceof MediaStorageError) {
+      return res.status(error.status).json({ error: error.message });
+    }
+
+    const code = (error as { httpCode?: number } | null)?.httpCode;
+    if (code === 413) {
+      return res.status(413).json({ error: "Image is too large. Please choose one under 8 MB." });
+    }
+
     logEvent("error", "media.upload_failed", { error });
-    return res.status(500).json({ error: "Upload failed. Please try again." });
+    return res.status(500).json({
+      error: "Upload failed. Please try again.",
+      ...(process.env.NODE_ENV !== "production" && error instanceof Error ? { detail: error.message } : {})
+    });
+  } finally {
+    if (tempPath) {
+      await unlink(tempPath).catch(() => undefined);
+    }
   }
 }
